@@ -56,7 +56,7 @@
   const { goLens } = require('../lib/SCRAPER/goLens')
   const { ephoto } = require('../lib/SCRAPER/ephoto')
   const Menu_List = require('../lib/validator/menu')
-  const { ulartangga } = require('./game/ulartangga.js')
+  const { ulartangga } = require('./game/ulartangga')
   //=======================================================//
                        /* { media } */
   //=======================================================//
@@ -286,13 +286,13 @@ module.exports = async(msg, client, from, store) => {
       case prefix+'welcome':{
           if (!isGroup) return msg.reply('Khusus Group!') 
           if (!msg.key.fromMe && !isOwner && !isGroupAdmins) return msg.reply("Khusus admin!")
-   		  if (args.length < 1) return msg.reply('ON || OFF')
-          if (args.length < 1 == 'ON' || args.length < 1 == 'on' || args.length < 1 == 'On') {
+   		  if (!args[0]) return msg.reply('ON || OFF')
+          if (args[0] == 'ON' || args[0] == 'on' || args[0] == 'On') {
        	       if (isWelcome) return msg.reply('Sudah aktif✓')
 		               welcomeJson.push(from)
 		               fs.writeFileSync('./message/group/welcome.json', JSON.stringify(welcomeJson))
 			        msg.reply('Suksess mengaktifkan welcome di group : '+groupName)
-			   } else if (args.length < 1 == 'OFF' || args.length < 1 == 'OF' || args.length < 1 == 'Of' || args.length < 1 == 'Off' || args.length < 1 == 'of' || args.length < 1 == 'off') {
+			   } else if (args[0] == 'OFF' || args[0] == 'OF' || args[0] == 'Of' || args[0] == 'Off' || args[0] == 'of' || args[0] == 'off') {
 						welcomeJson.splice(from, 1)
 						fs.writeFileSync('./message/group/welcome.json', JSON.stringify(welcomeJson))
 		          	msg.reply('Success menonaktifkan welcome di group : '+groupName)
@@ -476,11 +476,10 @@ case prefix+'pantun':{
                // title & participant
                if (!isGroupAdmins) return mag.reply('Khusus Admin')
                if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
-                  if (args.length < 1) return msg.reply('Tag orangnya')
                     console.log(mentionUser)
                     let menz = mentionUser
-                    client.sendMessage(from, { text: `@${msg.user.split("@")[0]}`, mentions: [mentionUser] }, { quoted : msg })
                          await client.groupParticipantsUpdate(from, mentionUser, "promote")
+	              client.sendMessage(from, { text: `@${msg.user.split("@")[0]}`, mentions: [mentionUser] }, { quoted : msg })  
 	         .catch((err) => msg.reply(err) ) }
            break
            //
@@ -493,10 +492,8 @@ case prefix+'pantun':{
               // title & participant
               if (!isGroupAdmins) return msg.reply('Khusus Admin')
               if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
-              if (args.length < 1) return msg.reply('Tag Orangnya')
                   console.log(mentionUser)
-                  client.sendMessage(from, { text: `@${msg.user.split("@")[0]}`, mentions: [mentionUser] }, { quoted : msg })
-               await client.groupParticipantsUpdate(from, mentionUser, "demote")
+               client.groupParticipantsUpdate(from, mentionUser, "demote")
         	.catch((err) => msg.reply(err) ) }
           break 
             //
@@ -507,21 +504,47 @@ case prefix+'pantun':{
                     client.sendGroupV4Invite(from, from, inv[0].invite_code, inv[0].invite_code_exp, groupMetadata.subject , `Salah Satu Admin Mengundang Anda Masuk Ke Sini Silahkan Klik Bergabung Untuk Masuk`)
            }
           break
+           //
           case prefix+'add':{
            if (!isGroup) return msg.reply('Khusus Grup')
            if (!isGroupAdmins) return msg.reply('Khusus Admin')
            if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
-           if (args.length < 1) return msg.reply('Masukkan Nomor\n\nContoh : #add 62xxxx')
-           var nyz = phone('+' + args.length < 1);
-           if (nyz.isValid == false) return msg.reply('Nomer Yang anda masukkan tidak valid, Lakukan Seperti petunjuk yang di berikan, Contoh 62xxxx')
-           await client.groupParticipantsUpdate(from, [nyz.phoneNumber.split("+")[1] + "@s.whatsapp.net"], "add")
+             if (args[1]){
+                 let number = msg.quoted ? msg.quoted.sender : q.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
+                 let response = await client.groupParticipantsUpdate(from, [number], "add")
+                 let o = await response[0]
+                 let inv = o.status       
+                       if(inv == 408) return msg.reply('Dia baru-baru saja keluar dari grub ini!')
+                       if(inv == 409) return msg.reply('Dia sudah join!')
+                       if(inv == 500) return msg.reply('Grub penuh!')
+                       if(inv == 403){
+                             client.sendMessage(from, { text: `@${number.split('@')[0]} tidak dapat ditambahkan karena target private acc*\nUndangan akan dikirimkan ke -> wa.me/${q.replace(/[^0-9]/g, '')} Melalui jalur pribadi`, mentions: [number] }, { quoted : msg }) 
+                             client.sendMessage(`${number}`, { text: `${'https://chat.whatsapp.com/' + invv}\n------------------------------------------------------\n\nAdmin:\nwa.me/${msg.sender}\n Mengundang anda ke group ini\nSilahkan masuk jika berkehendak🙇`, mentions: [number] }, { quoted : msg }) 
+                        } else { msg.reply('Errr')  }
+                        console.log(inv)
+              } else {
+                    let response = await client.groupParticipantsUpdate(from, mentionUser, "add")
+                    let o = await response[0]
+                    let inv = o.status
+                    let invv = await client.groupInviteCode(from) 
+                      console.log(inv)
+                      console.log(mentionUser)
+                       if(inv == 408) return msg.reply('Dia baru-baru saja keluar dari grub ini!')
+                       if(inv == 409) return msg.reply('Dia sudah join!')
+                       if(inv == 500) return msg.reply('Grub penuh!')
+                       if(inv == 403){
+                            client.sendMessage(from, { text: `${mentionUser} tidak dapat ditambahkan karena target private acc*\nUndangan akan dikirimkan ke -> wa.me/${mentionUser} Melalui jalur pribadi`, mentions: [mentionUser] }, { quoted : msg }) 
+                            client.sendMessage(`${mentionUser}`, { text: `${'https://chat.whatsapp.com/' + invv}\n------------------------------------------------------\n\nAdmin:\nwa.me/${msg.sender}\n Mengundang anda ke group ini\nSilahkan masuk jika berkehendak🙇`, mentions: [mentionUser] }, { quoted : msg }) 
+                         } else { msg.reply('Errr') }
+                        console.log(inv)
+              }   }
            break
             //
             case prefix+'kick':{
                  if (!isGroup) return msg.reply('Khusus Grup')
                  if (!isGroupAdmins) return msg.reply('Khusus Admin')
                  if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')     
-                 if (args.length < 1) return msg.reply('Tag orang yg akan di kick!!')
+                 if (!mentionUser) return msg.reply('Tag atau msg.reply member yg akan di kick!!')
                      console.log(mentionUser)
                   client.groupParticipantsUpdate(from, mentionUser, "remove")
               }
@@ -531,7 +554,7 @@ case prefix+'pantun':{
                    if (!isGroup) return msg.reply('Khusus Grup')
                    if (!isGroupAdmins) return msg.reply('Khusus Admin')
                    if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')     
-                   if (args.length < 1) return msg.reply('Sertakan teks deskripsi baru!')  
+                   if (!q) return msg.reply('Sertakan teks deskripsi baru!')  
                         console.log('PERBARUI DESKRIPSI GROUP', color(groupName, 'cyan'))
                     client.groupUpdateDescription(from, q)
               }
@@ -541,7 +564,7 @@ case prefix+'pantun':{
                    if (!isGroup) return msg.reply('Khusus Grup')
                    if (!isGroupAdmins) return msg.reply('Khusus Admin')
                    if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')     
-                   if (args.length < 1) return msg.reply('Sertakan teks untuk menamai grub ini dengan nama baru!')  
+                   if (!q) return msg.reply('Sertakan teks untuk menamai grub ini dengan nama baru!')  
                        console.log('PERBARUI NAMA GROUP', color(groupName, 'cyan'))
                        await client.groupUpdateSubject(from, q)
               }
@@ -560,31 +583,31 @@ case prefix+'pantun':{
                   if (!isGroup) return msg.reply('Khusus Grup')
                   if (!isGroupAdmins) return msg.reply('Khusus Admin')
                   if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')         
-                  if (args.length < 1) return msg.reply('| open || close || locked-change || unlocked-change || invitelink || revokeinvitelink || setpp |')
-                  if (args.length < 1 === "close" || args.length < 1 === "tutup") {          
+                  if (!args[0]) return msg.reply('| open || close || locked-change || unlocked-change || invitelink || revokeinvitelink || setpp |')
+                  if (args[0] === "close" || args[0] === "tutup") {          
                        await client.groupSettingUpdate(from, 'announcement')
                        console.log('MENUTUP GROUP', color(groupName, 'cyan'))
                        msg.reply('success✓')
-                  } else if (args.length < 1 === "open" || args.length < 1 === "buka") {          
+                  } else if (args[0] === "open" || args[0] === "buka") {          
                        await client.groupSettingUpdate(from, 'not_announcement')
                        console.log('MEMBUKA GROUP', color(groupName, 'cyan'))
                        msg.reply('success✓')
-                  } else if (args.length < 1 === "locked-change") {              
+                  } else if (args[0] === "locked-change") {              
                        await client.groupSettingUpdate(from, 'locked')
                        console.log('HANYA ADMIN YANG DAPAT MENGEDIT GROUP', color(groupName, 'cyan'))
                        msg.reply('success✓')
-                  } else if (args.length < 1 === "unlocked-change") {              
+                  } else if (args[0] === "unlocked-change") {              
                        await client.groupSettingUpdate(from, 'unlocked')
                        console.log('SEMUA PESERTA DAPAT MENGEDIT GROUP', color(groupName, 'cyan'))
                        msg.reply('success✓')
-                  } else if (args.length < 1 === "invitelink") {
+                  } else if (args[0] === "invitelink") {
                       let inv = await client.groupInviteCode(from) 
                       msg.reply('https://chat.whatsapp.com/' + inv)
-                  } else if (args.length < 1 === "revokeinvitelink") {
+                  } else if (args[0] === "revokeinvitelink") {
                       console.log('PEMBARUAN GROUP INVITE CODE', color(groupName, 'cyan'))
                       await client.groupRevokeInvite(from)
                       msg.reply('success✓')
-                  } else if (args.length < 1 === "setpp") {
+                  } else if (args[0] === "setpp") {
                       if (!msg.isQuotedImage) return msg.reply('Reply gambar yang akan dijadikan ikon group!')
                          client.sendMessage(from, { react: { text: "⏱️", key: msg.key }})
                          let buffer = await client.downloadMediaMessage(msg.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage, 'image')     
@@ -636,7 +659,7 @@ case prefix+'pantun':{
            //
           case prefix+"join":{
              if(!isOwner) return msg.reply('Khusus owner!!!!')
-             var link = args.length < 1.split("https://chat.whatsapp.com/")[1]
+             var link = args[0].split("https://chat.whatsapp.com/")[1]
                  if (!link) return reply("Invalid Link!")
             client.groupAcceptInvite(link).then(async(res) => msg.reply(jsonformat(res))).catch(_ => _)
            }
@@ -897,11 +920,11 @@ case prefix+'pantun':{
       rows: [
 	    {
 	     title: "[ 🎵 ] MP3", 
-	     rowId: `#youtubemp3 ${args.length < 1}|mp3`,
+	     rowId: `#youtubemp3 ${args[0]}|mp3`,
 	    },
 	    {
 	     title: "[ 🎵 ] M4A", 
-	     rowId: `#youtubemp3 ${args.length < 1}|m4a`, 
+	     rowId: `#youtubemp3 ${args[0]}|m4a`, 
 	    },
        ]        
      }    
@@ -1026,7 +1049,7 @@ case prefix+'pantun':{
    if (args.length < 1) return msg.reply('linknya?') 
    msg.reply('Downloading.....')
     try{
-	 await TiktokDownloader(args.length < 1)
+	 await TiktokDownloader(args[0])
  	 .then(async hasil => {
 	
 	  var { media } = hasil
