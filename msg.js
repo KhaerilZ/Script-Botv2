@@ -506,11 +506,12 @@ case prefix+'pantun':{
           break
            //
           case prefix+'add':{
-           if (!isGroup) return msg.reply('Khusus Grup')
-           if (!isGroupAdmins) return msg.reply('Khusus Admin')
-           if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
-           let users = m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
-           await client.groupParticipantsUpdate(from, [users], "add")
+                if (!isGroup) return msg.reply('Khusus Grup')
+                if (!isGroupAdmins) return msg.reply('Khusus Admin')
+                if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
+                if (!q) return msg.reply('Masukan Nomor!\n contoh : #add 62xxx')
+                    var nyz = phone('+' + q);
+                 await rimurubotz.groupParticipantsUpdate(from, [nyz.phoneNumber.split("+")[1] + "@s.whatsapp.net"], "add")
 	       }
            break
             //
