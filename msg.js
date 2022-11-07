@@ -511,7 +511,7 @@ case prefix+'pantun':{
                 if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
                 if (!q) return msg.reply('Masukan Nomor!\n contoh : #add 62xxx')
                     var nyz = phone('+' + q);
-                 await rimurubotz.groupParticipantsUpdate(from, [nyz.phoneNumber.split("+")[1] + "@s.whatsapp.net"], "add")
+                 await rimurubotz.groupParticipantsUpdate(from, [nyz.split("+")[1] + "@s.whatsapp.net"], "add")
 	       }
            break
             //
