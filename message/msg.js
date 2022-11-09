@@ -571,6 +571,9 @@ case prefix+'pantun':{
              break
               //
              case prefix+'tagall':{
+                   if (!isGroup) return msg.reply('Khusus Grup')
+                   if (!isGroupAdmins) return msg.reply('Khusus Admin')
+                   if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
                   let teks = `     「 Tag all 」  \n\n⇨ Pesan : ${args.join(" ") ? args.join(" ") : 'Text Kosong'}\n\n`
                    for (let mem of groupMembers) {
                       teks += `⇨ @${mem.id.split('@')[0]}\n`
