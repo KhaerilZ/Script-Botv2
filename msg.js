@@ -506,13 +506,39 @@ case prefix+'pantun':{
           break
            //
           case prefix+'add':{
-                if (!isGroup) return msg.reply('Khusus Grup')
-                if (!isGroupAdmins) return msg.reply('Khusus Admin')
-                if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
-                if (!q) return msg.reply('Masukan Nomor!\n contoh : #add 62xxx')
-                    var nyz = phone('+' + q);
-                 await rimurubotz.groupParticipantsUpdate(from, [nyz.split("+")[1] + "@s.whatsapp.net"], "add")
-	       }
+           if (!isGroup) return msg.reply('Khusus Grup')
+           if (!isGroupAdmins) return msg.reply('Khusus Admin')
+           if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
+           if (!q) return msg.reply('Masukkan Nomor\n\n*Contoh : #add +62 999-9999-9999*')
+             if (args[1]){
+                 let number = msg.quoted ? msg.quoted.sender : q.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
+                 let response = await client.groupParticipantsUpdate(from, [number], "add")
+                 let o = await response[0]
+                 let inv = o.status       
+                       if(inv == 408) return msg.reply('Dia baru-baru saja keluar dari grub ini!')
+                       if(inv == 409) return msg.reply('Dia sudah join!')
+                       if(inv == 500) return msg.reply('Grub penuh!')
+                       if(inv == 403){
+                             client.sendMessage(from, { text: `@${number.split('@')[0]} tidak dapat ditambahkan karena target private acc*\nUndangan akan dikirimkan ke -> wa.me/${q.replace(/[^0-9]/g, '')} Melalui jalur pribadi`, mentions: [number] }, { quoted : msg }) 
+                             client.sendMessage(`${number}`, { text: `${'https://chat.whatsapp.com/' + invv}\n------------------------------------------------------\n\nAdmin:\nwa.me/${msg.sender}\n Mengundang anda ke group ini\nSilahkan masuk jika berkehendak🙇`, mentions: [number] }, { quoted : msg }) 
+                        } else { msg.reply('Sukses✓')  }
+                        console.log(inv)
+              } else {
+                    let response = await client.groupParticipantsUpdate(from, mentionUser, "add")
+                    let o = await response[0]
+                    let inv = o.status
+                    let invv = await client.groupInviteCode(from) 
+                      console.log(inv)
+                      console.log(mentionUser)
+                       if(inv == 408) return msg.reply('Dia baru-baru saja keluar dari grub ini!')
+                       if(inv == 409) return msg.reply('Dia sudah join!')
+                       if(inv == 500) return msg.reply('Grub penuh!')
+                       if(inv == 403){
+                            client.sendMessage(from, { text: `${mentionUser} tidak dapat ditambahkan karena target private acc*\nUndangan akan dikirimkan ke -> wa.me/${mentionUser} Melalui jalur pribadi`, mentions: [mentionUser] }, { quoted : msg }) 
+                            client.sendMessage(`${mentionUser}`, { text: `${'https://chat.whatsapp.com/' + invv}\n------------------------------------------------------\n\nAdmin:\nwa.me/${msg.sender}\n Mengundang anda ke group ini\nSilahkan masuk jika berkehendak🙇`, mentions: [mentionUser] }, { quoted : msg }) 
+                         } else { msg.reply('Errr') }
+                        console.log(inv)
+              }   }
            break
             //
             case prefix+'kick':{
@@ -546,6 +572,9 @@ case prefix+'pantun':{
              break
               //
              case prefix+'tagall':{
+                   if (!isGroup) return msg.reply('Khusus Grup')
+                   if (!isGroupAdmins) return msg.reply('Khusus Admin')
+                   if (!isBotGroupAdmins) return msg.reply('Bot Bukan Admin')
                   let teks = `     「 Tag all 」  \n\n⇨ Pesan : ${args.join(" ") ? args.join(" ") : 'Text Kosong'}\n\n`
                    for (let mem of groupMembers) {
                       teks += `⇨ @${mem.id.split('@')[0]}\n`
