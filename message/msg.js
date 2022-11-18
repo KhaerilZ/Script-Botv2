@@ -209,7 +209,7 @@ module.exports = async(msg, client, from, store) => {
       // 
       case prefix+'ulartangga':{
        if(fs.existsSync('./storage_cabinets/D-B/ulartangga/' + from + '.json')) return msg.reply('Masih ada permainan disini!')
-       if(msg.message.extendedTextMessage === undefined || msg.message.extendedTextMessage === null) return msg.reply('tag orang yang ingin anda ajak bermain!')
+       if(msg.message.extendedTextMessage === undefined || msg.message.extendedTextMessage === null) return msg.reply('fitur ini sedang bug!')
         let PL = mentionByTag[0]? mentionByTag[0] : mentionByreply ? mentionByreply : q.replace(new RegExp("[()+-/ +/]", "gi"), "") + `@s.whatsapp.net`                        
         playersUT1 = msg.sender
         playersUT2 = PL
@@ -487,6 +487,32 @@ case prefix+'pantun':{
                 fetchJson(q)  
            }
           break
+          //
+          case prefix+'meme1': case prefix+'smeme1': case prefix+'memegen1': case prefix+'meme2': case prefix+'smeme2': case prefix+'memegen2': case prefix+'meme3': case prefix+'smeme3': case prefix+'memegen3':{
+          if ((isMedia && !msg.message.videoMessage || msg.isQuotedImage) && args.length == 0) {
+          if (command == 'meme1' || command == 'smeme1' || command == 'memegen1') {
+          if (!q) return msg.reply("Masukkan Text")
+          var nyz = `https://pecundang.herokuapp.com/api/memegen1?teks=${q}&img_url=${await download("imageUrl","makers")}`
+}
+          if (command == 'meme2' || command == 'smeme2' || command == 'memegen2') {
+          if (!q1 && !q2) return msg.reply("Masukkan Text1&text2")
+          var nyz = `https://pecundang.herokuapp.com/api/memegen2?teks1=${q1}&teks2=${q2}&img_url=${await download("imageUrl","makers")}`
+}
+          if (command == 'meme3' || command == 'smeme3' || command == 'memegen3') {
+          if (!q) return msg.reply("Masukkan Text")
+          var nyz = `https://pecundang.herokuapp.com/api/memegen3?teks=${q}&img_url=${await download("imageUrl","makers")}`
+}
+var nyz1 = await imageToBase64(JSON.stringify(nyz).replace(/\"/gi, ''))
+fs.writeFileSync('getpp.jpeg', nyz1, 'base64')
+await ffmpeg("getpp.jpeg")
+.input("getpp.jpeg")
+.on('end', function () {client.sendMessage(from, { sticker: {url: './getpp.webp'}, mimetype: 'image/webp' })})
+.addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
+.toFormat('webp')
+.save('./getpp.webp')
+} else msg.reply(`Kirim image Dengan caption ${prefix + command}`)
+}
+break
           //
           case prefix+'demote':{
               // title & participant
