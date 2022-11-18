@@ -91,6 +91,8 @@ module.exports = async(msg, client, from, store) => {
    const order = ordermessage.slice(0).trim().split(/ +/).shift().toLowerCase()	   
    const command = ordermessage.slice(1)
    const q = args.join(' ')     
+   const q1 = q.split('&')[0];
+   const q2 = q.split('&')[1];
    const isCmd = ordermessage.startsWith(prefix)   
    const orderPlugins = isCmd ? ordermessage.slice(1).trim().split(/ +/).shift().toLowerCase() : null
    const isGroup = from.endsWith('@g.us')
@@ -506,7 +508,7 @@ var nyz1 = await imageToBase64(JSON.stringify(nyz).replace(/\"/gi, ''))
 fs.writeFileSync('getpp.jpeg', nyz1, 'base64')
 await ffmpeg("getpp.jpeg")
 .input("getpp.jpeg")
-.on('end', function () {client.sendMessage(from, { sticker: {url: './getpp.webp'}, mimetype: 'image/webp' })})
+.on('end', function () {client.sendMessage(from, { sticker: {url: './getpp.webp'}, { quoted: msg } })})
 .addOutputOptions([`-vcodec`, `libwebp`, `-vf`, `scale='min(320,iw)':min'(320,ih)':force_original_aspect_ratio=decrease,fps=15, pad=320:320:-1:-1:color=white@0.0, split [a][b]; [a] palettegen=reserve_transparent=on:transparency_color=ffffff [p]; [b][p] paletteuse`])
 .toFormat('webp')
 .save('./getpp.webp')
